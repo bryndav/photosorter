@@ -21,3 +21,7 @@ In this folder there should be a python script that access each photos header (t
 # Extensions
 
 Include a renaming function for the photos aswell, so instead of the standard names like IMG698774 give it a name related to the date it was taken? Or maybe name it after some other hint that can be extracted from the header of a photo?
+
+# Aftermath
+
+Turns out to be a much more simple code then excpected. Now it is solved. Could not find any GPSInfo in any of the picture so I will settle with renaming the pictures after the days they were taken. Update soon.
