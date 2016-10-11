@@ -7,7 +7,7 @@ PATH = '/home/dbry/ownCloud/Foton/Mobilbilder'
 
 def generateExif(filepath):
     """
-    A function for genereating information about a image header.
+    A function for genereating a dictionary with the image header information stored.
     """
     img = Image.open(filepath)
     exif = {
