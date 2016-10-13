@@ -7,15 +7,18 @@ PATH = '/home/dbry/ownCloud/Foton/Mobilbilder'
 
 def generateExif(filepath):
     """
-    A function for genereating a dictionary with the image header information stored.
+    A function for genereating information about a image header.
     """
     img = Image.open(filepath)
-    exif = {
-        PIL.ExifTags.TAGS[k]: v
-        for k, v in img._getexif().items()
-        if k in PIL.ExifTags.TAGS
-        }
-    return exif
+    if img._getexif():
+        exif = {
+            PIL.ExifTags.TAGS[k]: v
+            for k, v in img._getexif().items()
+            if k in PIL.ExifTags.TAGS
+            }
+        return exif
+    else:
+        return None
 
 if __name__ == '__main__':
 
