@@ -1,5 +1,5 @@
 import os
-import sort.currentExif
+import sort
 
 PATH = '/home/dbry/ownCloud/Foton/Mobilbilder'
 
@@ -15,11 +15,8 @@ for lib in os.listdir(PATH):
                 filepath = newpath + '/' + file
 
                 currentExif = sort.generateExif(filepath)
-
-                os.rename(file, currentExif['DateTime'][:-9].replace(':', '-')
-                            + '_' + currentExif['DateTime'][11:].replace(':', '-')
-                            )
+                if currentExif:
+                    os.rename(file, currentExif['DateTime'][:-9].replace(':', '-')
+                              + '_' + currentExif['DateTime'][11:].replace(':', '-')
+                              + '.jpg')
     except OSError: pass
-
-
-            
