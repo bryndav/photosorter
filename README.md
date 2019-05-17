@@ -1,9 +1,9 @@
 # Photosorter.py
 
 # Short intro
-This is my first GitProject, mostly for learning the ropes. The idé is to create a python script that will sort photos into sub-directorys.
+This is my first GitProject, mostly for learning the ropes. The idea is to create a python script that will sort photos into sub-directorys.
 
-# program idé
+# Program idea
 
 I want to be able to upload images from my cellphone into a folder called my photos.
 In this folder there should be a python script that access each photos header (through som standard lib hopefully) to find out the date the photo was taken. From there it will first check if there is a subfolder for the month the photo was taken (done through the OS.path checkdir? function) if so move the photo there, otherwise create a folder called ex. "2016-05" and then move the photo.
