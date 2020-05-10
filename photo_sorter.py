@@ -1,0 +1,129 @@
+import os
+
+import PIL.ExifTags
+import shutil
+
+from PIL import Image
+
+
+class PhotoSorter(object):
+    """
+    Given a path to a folder containing images, sorts the images
+    and renames them to the date and time when they where taken.
+    Image information is extracted from the headers containing information
+    regarding time, location and systemsettings.
+    """
+
+    def __init__(self, root_folder=None):
+        """
+        :param root_folder: Path to folder containing images (str)
+        """
+        self.root_folder = root_folder
+        self.current_img = None
+        self.current_exif = None
+
+    def sort(self, root_folder=None):
+        """
+        Method that drives the sorting process.
+
+        :param root_folder: Optional path to folder containing images (str)
+        """
+        if root_folder is not None:
+            self.root_folder = root_folder
+
+        for img in self.generate_img():
+            storage_dir = self._move_image()
+            self._rename_img(storage_dir, img)
+
+    def _move_image(self):
+        """
+        Extracts the time from a image header, creates a new directory based
+        on that time (i.e 2019-01) and moves the image.
+
+        :return: Path to the new storage location (str)
+        """
+        year_month = self.current_exif['DateTime'][:-12].replace(':', '-')
+        storageDir = self._check_destination_folder(year_month)
+        shutil.move(self.current_img, storageDir)
+
+        return storageDir
+
+    def _rename_img(self, storage_dir, img):
+            """
+            Renames a image based on the date it was taken extracted
+            from the image header.
+
+            :param storage_dir: Path to the new storage location (str)
+            :param img: Name of the file (str)
+            """
+            new_name = "{}_{}.jpg".format(
+                self.current_exif['DateTime'][:-9].replace(':', '-'),
+                self.current_exif['DateTime'][11:].replace(':', '-'))
+
+            old_file = os.path.join(storage_dir, img)
+            new_file = os.path.join(storage_dir, new_name)
+
+            try:
+                os.rename(old_file, new_file)
+            except Exception:
+                print "Unable to rename {} to {}, file already exists".format(old_file, new_file)
+
+    def generate_img(self):
+        """
+        A generator that returns images in the root folder given that
+        they have a certain file ending.
+
+        :return: Path to a file to be moved (str)
+        """
+        for img in os.listdir(self.root_folder):
+            filetype = img.split(".")[-1]
+
+            if filetype in ["jpg", "JPG", "jpeg", "JPEG"]:
+                self.current_img = os.path.join(self.root_folder, img)
+                self.current_exif = self.get_exif(self.current_img)
+
+                if self.current_exif is None:
+                    continue
+
+                yield img
+
+    def get_exif(self, filepath):
+        """
+        A function for genereating information about a image header.
+
+        :return: Dictionary containing information tags (dict)
+        """
+        img = Image.open(filepath)
+
+        try:
+            exif = {PIL.ExifTags.TAGS[k]: v for k, v in img._getexif().items()
+                    if k in PIL.ExifTags.TAGS}
+        except AttributeError:
+            exif = None
+
+        return exif
+
+    def _check_destination_folder(self, year_month):
+        """
+        Checks if there is a folder named as the argument. If not
+        creates that folder.
+
+        :param year_month: A string representing a year and month xxxx-yy (str)
+        :return: Full path to the folder
+        """
+        destination = os.path.join(self.root_folder, year_month)
+
+        if not os.path.isdir(destination):
+            os.makedirs(destination)
+
+        return destination
+
+
+if __name__ == '__main__':
+
+    # Example path, please edit
+    image_root = "C:\\Users\\User\\Photos"
+
+    sort_photos = PhotoSorter(image_root)
+    sort_photos.sort()
+
