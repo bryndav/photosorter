@@ -1,9 +1,20 @@
 import os
-
-import PIL.ExifTags
+import logging
 import shutil
+import PIL.ExifTags
 
 from PIL import Image
+
+logger = logging.getLogger(__name__)
+
+handler = logging.StreamHandler()
+handler.setLevel(logging.INFO)
+
+formatter = logging.Formatter()
+formatter.format("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+
+handler.setFormatter(formatter)
+logger.addHandler(handler)
 
 
 class PhotoSorter(object):
@@ -31,6 +42,8 @@ class PhotoSorter(object):
         if root_folder is not None:
             self.root_folder = root_folder
 
+        logger.info("Starting to sort photos in {} ....".format(self.root_folder))
+
         for img in self.generate_img():
             storage_dir = self._move_image()
             self._rename_img(storage_dir, img)
@@ -44,6 +57,8 @@ class PhotoSorter(object):
         """
         year_month = self.current_exif['DateTime'][:-12].replace(':', '-')
         storageDir = self._check_destination_folder(year_month)
+
+        logger.debug("Moving {} to {}".format(self.current_img, storageDir))
         shutil.move(self.current_img, storageDir)
 
         return storageDir
@@ -65,8 +80,9 @@ class PhotoSorter(object):
 
             try:
                 os.rename(old_file, new_file)
-            except Exception:
-                print "Unable to rename {} to {}, file already exists".format(old_file, new_file)
+            except Exception as e:
+                logger.warning("Unable to rename {} to {}, file already exists".format(old_file, new_file))
+                logger.debug(e)
 
     def generate_img(self):
         """
@@ -75,17 +91,24 @@ class PhotoSorter(object):
 
         :return: Path to a file to be moved (str)
         """
-        for img in os.listdir(self.root_folder):
-            filetype = img.split(".")[-1]
+        img_list = []
 
-            if filetype in ["jpg", "JPG", "jpeg", "JPEG"]:
-                self.current_img = os.path.join(self.root_folder, img)
-                self.current_exif = self.get_exif(self.current_img)
+        for f in os.listdir(self.root_folder):
+            filetype = f.split(".")[-1]
 
-                if self.current_exif is None:
-                    continue
+            if filetype.lower() in ["jpg", "jpeg"]:
+                img_list.append(f)
 
-                yield img
+        logger.info("Found {} images in {}".format(len(img_list), self.root_folder))
+
+        for img in img_list:
+            self.current_img = os.path.join(self.root_folder, img)
+            self.current_exif = self.get_exif(self.current_img)
+
+            if self.current_exif is None:
+                continue
+
+            yield img
 
     def get_exif(self, filepath):
         """
@@ -98,7 +121,12 @@ class PhotoSorter(object):
         try:
             exif = {PIL.ExifTags.TAGS[k]: v for k, v in img._getexif().items()
                     if k in PIL.ExifTags.TAGS}
-        except AttributeError:
+        except AttributeError as e:
+            logger.warning(e)
+            exif = None
+
+        if "DateTime" not in exif.keys():
+            logger.warning("No valid DateTime field in exif for {}".format(filepath))
             exif = None
 
         return exif
@@ -114,6 +142,7 @@ class PhotoSorter(object):
         destination = os.path.join(self.root_folder, year_month)
 
         if not os.path.isdir(destination):
+            logger.debug("Creating directory {}".format(destination))
             os.makedirs(destination)
 
         return destination

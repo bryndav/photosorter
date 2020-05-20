@@ -1,27 +1,38 @@
 # Photosorter.py
 
-# Short intro
-This is my first GitProject, mostly for learning the ropes. The idea is to create a python script that will sort photos into sub-directorys.
+# Intro
+A common problem for me is that I take a lot of photos on my phone, sooner or later the time comes when storage is full.
+What I usually do then is dumping my photos into a folder and then whipe to storage media. Photos on my phone usually
+lacks good naming and it is a hustle to sort the photos so I just leave them in a messy folder for later.
 
-# Program idea
+This is where the photosorter app comes into play, what it does is accessing the header information of photos to extract
+the time and date the photo was taken, then it renames photos according to the date and puts them in a folder named
+after the year and month the photo was taken (i.e 2019-01).
 
-I want to be able to upload images from my cellphone into a folder called my photos.
-In this folder there should be a python script that access each photos header (through som standard lib hopefully) to find out the date the photo was taken. From there it will first check if there is a subfolder for the month the photo was taken (done through the OS.path checkdir? function) if so move the photo there, otherwise create a folder called ex. "2016-05" and then move the photo.
+# Dependencies
 
-# Steps to make this program come true
+* Pillow
+    https://pillow.readthedocs.io/en/stable/index.html
 
-  * Find a suitable package for accessing photo headers, this should take all the common formats such as jpg. png. etc.
-  
-  * Write the sudocode for the program
-  
-  * Learn how to structure the skeleton for a real python project, create __init__.py and what not?
-  
-  * Dare to ask for help from the github crowd and see what the fuss is all about.
-  
 # Extensions
 
-Include a renaming function for the photos aswell, so instead of the standard names like IMG698774 give it a name related to the date it was taken? Or maybe name it after some other hint that can be extracted from the header of a photo?
+Coming changes
 
-# Aftermath
+* Logger
+* Setup tool,  for automatic requirements handling and installment
+* Args parsing, for easier use then needing to go into the code to change folder path
+* Database, simple indexing of images
 
-Turns out to be a much more simple code then excpected. Now it is solved. Could not find any GPSInfo in any of the picture so I will settle with renaming the pictures after the days they were taken. Update soon.
+# Usage
+
+import PhotoSorter
+
+image_folder_path = "C:\\Users\\User\\Photos"
+
+sort_photos = PhotoSorter(image_folder_path)
+sort_photos.sort()
+
+
+Alternative
+
+PhotoSorter.sort("C:\\Users\\User\\Photos")
