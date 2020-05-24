@@ -18,8 +18,6 @@ after the year and month the photo was taken (i.e 2019-01).
 
 Coming changes
 
-* Logger
-* Setup tool,  for automatic requirements handling and installment
 * Args parsing, for easier use then needing to go into the code to change folder path
 * Database, simple indexing of images
 
