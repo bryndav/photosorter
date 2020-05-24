@@ -1,18 +1,18 @@
 import os
 import logging
 import shutil
+import sys
 import PIL.ExifTags
 
 from PIL import Image
 
-logger = logging.getLogger(__name__)
+# Setting up logger properties
+logger = logging.getLogger("sorter")
+logger.setLevel(logging.INFO)
 
-handler = logging.StreamHandler()
+handler = logging.StreamHandler(sys.stdout)
 handler.setLevel(logging.INFO)
-
-formatter = logging.Formatter()
-formatter.format("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-
+formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
 
@@ -30,6 +30,7 @@ class PhotoSorter(object):
         :param root_folder: Path to folder containing images (str)
         """
         self.root_folder = root_folder
+        self.img_list = self.get_unsorted_images()
         self.current_img = None
         self.current_exif = None
 
@@ -42,7 +43,7 @@ class PhotoSorter(object):
         if root_folder is not None:
             self.root_folder = root_folder
 
-        logger.info("Starting to sort photos in {} ....".format(self.root_folder))
+        logger.info("Starting to sort {} photos in {} ....".format(len(self.img_list), self.root_folder))
 
         for img in self.generate_img():
             storage_dir = self._move_image()
@@ -79,6 +80,7 @@ class PhotoSorter(object):
             new_file = os.path.join(storage_dir, new_name)
 
             try:
+                logger.debug("Renaming {} to {}".format(old_file, new_file))
                 os.rename(old_file, new_file)
             except Exception as e:
                 logger.warning("Unable to rename {} to {}, file already exists".format(old_file, new_file))
@@ -91,6 +93,17 @@ class PhotoSorter(object):
 
         :return: Path to a file to be moved (str)
         """
+        for img in self.img_list:
+            self.current_img = os.path.join(self.root_folder, img)
+            self.current_exif = self.get_exif(self.current_img)
+
+            if self.current_exif is None:
+                continue
+
+            yield img
+
+    def get_unsorted_images(self):
+        """Looks for images in the root folder of type jpg or jpeg."""
         img_list = []
 
         for f in os.listdir(self.root_folder):
@@ -99,16 +112,9 @@ class PhotoSorter(object):
             if filetype.lower() in ["jpg", "jpeg"]:
                 img_list.append(f)
 
-        logger.info("Found {} images in {}".format(len(img_list), self.root_folder))
+        logger.debug("Found {} images in {}".format(len(img_list), self.root_folder))
 
-        for img in img_list:
-            self.current_img = os.path.join(self.root_folder, img)
-            self.current_exif = self.get_exif(self.current_img)
-
-            if self.current_exif is None:
-                continue
-
-            yield img
+        return img_list
 
     def get_exif(self, filepath):
         """
@@ -155,4 +161,3 @@ if __name__ == '__main__':
 
     sort_photos = PhotoSorter(image_root)
     sort_photos.sort()
-
