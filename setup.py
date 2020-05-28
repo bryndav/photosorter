@@ -1,4 +1,5 @@
-"""A setuptools for photosorter application
+"""
+Setuptools for photo sorter application.
 """
 
 from setuptools import setup, find_packages
@@ -12,7 +13,7 @@ with open(path.join(here, 'README.md'), encoding='utf-8') as f:
 
 setup(
     name='photosorter',  # Required
-    version='0.1.3',  # Required
+    version='0.1.4',  # Required
     description='A application for sorting and renaming photos',  # Optional
     long_description=long_description,  # Optional
     long_description_content_type='text/markdown',  # Optional (see note above)
@@ -23,9 +24,4 @@ setup(
     packages=find_packages(where='photosorter'),  # Required
     python_requires='>=2.7, <11',
     install_requires=['pillow'],  # Optional
-    entry_points={  # Optional
-        'console_scripts': [
-            'sort=photosorter:main',
-        ],
-    }
 )
