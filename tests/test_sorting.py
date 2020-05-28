@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+
 try:
     import unittest2 as unittest
 except ImportError:
@@ -7,9 +9,10 @@ import logging
 import os
 import re
 
+import src.photo_sorter as ps
+
 from shutil import copy, rmtree
 
-from photosorter import photo_sorter
 
 logger = logging.getLogger("sorter")
 
@@ -44,7 +47,7 @@ def clear_test_area(path):
 
 def get_sorter():
     """Generate photo sorter object for testing"""
-    return photo_sorter.PhotoSorter(ROOT)
+    return ps.PhotoSorter(ROOT)
 
 
 class SortingTest(unittest.TestCase):
