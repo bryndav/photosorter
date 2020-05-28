@@ -1,3 +1,5 @@
+#!/usr/bin/env python2
+
 import os
 import logging
 import shutil
@@ -11,7 +13,6 @@ logger = logging.getLogger("sorter")
 logger.setLevel(logging.INFO)
 
 handler = logging.StreamHandler(sys.stdout)
-handler.setLevel(logging.INFO)
 formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 handler.setFormatter(formatter)
 logger.addHandler(handler)
@@ -19,10 +20,9 @@ logger.addHandler(handler)
 
 class PhotoSorter(object):
     """
-    Given a path to a folder containing images, sorts the images
-    and renames them to the date and time when they where taken.
-    Image information is extracted from the headers containing information
-    regarding time, location and systemsettings.
+    Given a path to a folder containing images, sorts the images and renames them to
+    the date and time when they where taken. Image information is extracted from the
+    headers containing information regarding time, location and system settings.
     """
 
     def __init__(self, root_folder=None):
@@ -42,32 +42,35 @@ class PhotoSorter(object):
         """
         if root_folder is not None:
             self.root_folder = root_folder
+            self.img_list = self.get_unsorted_images()
 
-        logger.info("Starting to sort {} photos in {} ....".format(len(self.img_list), self.root_folder))
+        if self.img_list:
+            logger.info("Starting to sort {} photos in {} ....".format(len(self.img_list), self.root_folder))
 
-        for img in self.generate_img():
-            storage_dir = self._move_image()
-            self._rename_img(storage_dir, img)
+            for img in self.generate_img():
+                storage_dir = self._move_image()
+                self._rename_img(storage_dir, img)
+        else:
+            logger.info("No photos found in {} exiting....".format(self.root_folder))
 
     def _move_image(self):
         """
-        Extracts the time from a image header, creates a new directory based
-        on that time (i.e 2019-01) and moves the image.
+        Creates a new directory based on that time (i.e 2019-01) a photo was taken and moves the photo
+        into that directory.
 
         :return: Path to the new storage location (str)
         """
         year_month = self.current_exif['DateTime'][:-12].replace(':', '-')
-        storageDir = self._check_destination_folder(year_month)
+        storage_dir = self._check_destination_folder(year_month)
 
-        logger.debug("Moving {} to {}".format(self.current_img, storageDir))
-        shutil.move(self.current_img, storageDir)
+        logger.debug("Moving {} to {}".format(self.current_img, storage_dir))
+        shutil.move(self.current_img, storage_dir)
 
-        return storageDir
+        return storage_dir
 
     def _rename_img(self, storage_dir, img):
             """
-            Renames a image based on the date it was taken extracted
-            from the image header.
+            Renames a image based on the date it was taken extracted from the image header.
 
             :param storage_dir: Path to the new storage location (str)
             :param img: Name of the file (str)
@@ -88,8 +91,7 @@ class PhotoSorter(object):
 
     def generate_img(self):
         """
-        A generator that returns images in the root folder given that
-        they have a certain file ending.
+        A generator that returns images in the root folder given that they have a certain file ending.
 
         :return: Path to a file to be moved (str)
         """
@@ -107,9 +109,9 @@ class PhotoSorter(object):
         img_list = []
 
         for f in os.listdir(self.root_folder):
-            filetype = f.split(".")[-1]
+            file_type = f.split(".")[-1]
 
-            if filetype.lower() in ["jpg", "jpeg"]:
+            if file_type.lower() in ["jpg", "jpeg"]:
                 img_list.append(f)
 
         logger.debug("Found {} images in {}".format(len(img_list), self.root_folder))
@@ -118,7 +120,7 @@ class PhotoSorter(object):
 
     def get_exif(self, filepath):
         """
-        A function for genereating information about a image header.
+        A function for generating information about a image header.
 
         :return: Dictionary containing information tags (dict)
         """
@@ -139,8 +141,7 @@ class PhotoSorter(object):
 
     def _check_destination_folder(self, year_month):
         """
-        Checks if there is a folder named as the argument. If not
-        creates that folder.
+        Checks if there is a folder named as the argument. If not creates that folder.
 
         :param year_month: A string representing a year and month xxxx-yy (str)
         :return: Full path to the folder
@@ -155,9 +156,19 @@ class PhotoSorter(object):
 
 
 if __name__ == '__main__':
+    import argparse
 
-    # Example path, please edit
-    image_root = "C:\\Users\\User\\Photos"
+    parser = argparse.ArgumentParser(description="Sorts images according to date taken")
+    parser.add_argument("img_path", type=str, help="path to image directory")
+    parser.add_argument("-v", "--verbosity", action="store_true", default=0, help="increases verbosity")
+    args = parser.parse_args()
 
-    sort_photos = PhotoSorter(image_root)
-    sort_photos.sort()
+    if args.verbosity:
+        logger.setLevel(logging.DEBUG)
+
+    if os.path.isdir(args.img_path):
+        sorter = PhotoSorter(args.img_path)
+        sorter.sort()
+
+    else:
+        print "Given path {} is not a valid directory, please provide a valid full path"
