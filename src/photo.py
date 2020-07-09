@@ -109,6 +109,14 @@ class Photo(object):
     def date_taken(self):
         return copy(self._img_data["DateTime"])
 
+    @property
+    def location(self):
+        return copy(self._img_data["Location"])
+
+    @location.setter
+    def location(self, new_location):
+        self._img_data["Location"] = new_location
+
     def to_sql(self):
         pass
 
