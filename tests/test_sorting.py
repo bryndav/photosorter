@@ -9,7 +9,8 @@ import logging
 import os
 import re
 
-import src.photo_sorter as ps
+from src.photo_sorter import PhotoSorter
+from src.photo import Photo
 
 from shutil import copy, rmtree
 
@@ -47,21 +48,21 @@ def clear_test_area(path):
 
 def get_sorter():
     """Generate photo sorter object for testing"""
-    return ps.PhotoSorter(ROOT)
+    return PhotoSorter(ROOT)
 
 
-class SortingTest(unittest.TestCase):
+class TestSorting(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Runs pre-condition method before test execution"""
+        """Runs pre-condition method before test execution."""
         populate_test_area(RESOURCES, ROOT)
         sorter = get_sorter()
         sorter.sort()
 
     @classmethod
     def tearDownClass(cls):
-        """Runs methods for cleaning up after test execution"""
+        """Runs methods for cleaning up after test execution."""
         clear_test_area(ROOT)
 
     def setUp(self):
@@ -100,6 +101,127 @@ class SortingTest(unittest.TestCase):
         sorted_image_name = self.list_of_files_sorted[0]
 
         assert(expected_format.search(sorted_image_name) is not None), \
+            "Image did not follow naming according to {}".format(expected_format.pattern)
+
+
+class TestPhoto(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        """Runs pre-condition method before test execution."""
+        populate_test_area(RESOURCES, ROOT)
+
+    @classmethod
+    def tearDownClass(cls):
+        """Runs methods for cleaning up after test execution."""
+        clear_test_area(ROOT)
+
+    def get_photo_object(self):
+        sorter = get_sorter()
+        img_path = os.path.join(ROOT, sorter.img_list[0])
+
+        photo_info = sorter.get_exif(img_path)
+        photo_info["Location"] = img_path
+        photo = Photo(**photo_info)
+
+        return photo
+
+    def test_photo_camera_maker(self):
+        photo = self.get_photo_object()
+
+        assert(type(photo.camera_maker) is not None)
+
+    def test_photo_length(self):
+        photo = self.get_photo_object()
+
+        assert(type(photo.length) is not None)
+
+    def test_photo_width(self):
+        photo = self.get_photo_object()
+
+        assert(type(photo.width) is not None)
+
+    def test_photo_reselution(self):
+        photo = self.get_photo_object()
+
+        assert(type(photo.resolution_unit) is not None)
+
+    def test_photo_y_reselution(self):
+        photo = self.get_photo_object()
+
+        assert(type(photo.y_resolution) is not None)
+
+    def test_photo_x_reselution(self):
+        photo = self.get_photo_object()
+
+        assert(type(photo.x_resolution) is not None)
+
+    def test_photo_brightness(self):
+        photo = self.get_photo_object()
+
+        assert(type(photo.brightness) is not None)
+
+    def test_photo_zoom_ratio(self):
+        photo = self.get_photo_object()
+
+        assert(type(photo.zoom_ratio) is not None)
+
+    def test_photo_contrast(self):
+        photo = self.get_photo_object()
+
+        assert(type(photo.contrast) is not None)
+
+    def test_photo_white_balance(self):
+        photo = self.get_photo_object()
+
+        assert(type(photo.white_balance) is not None)
+
+    def test_photo_color_space(self):
+        photo = self.get_photo_object()
+
+        assert(type(photo.color_space) is not None)
+
+    def test_photo_saturation(self):
+        photo = self.get_photo_object()
+
+        assert(type(photo.saturation) is not None)
+
+    def test_photo_focal_length(self):
+        photo = self.get_photo_object()
+
+        assert(type(photo.focal_length) is not None)
+
+    def test_photo_shutter_value(self):
+        photo = self.get_photo_object()
+
+        assert(type(photo.shutter_value) is not None)
+
+    def test_photo_f_number(self):
+        photo = self.get_photo_object()
+
+        assert(type(photo.f_number) is not None)
+
+    def test_photo_light_source(self):
+        photo = self.get_photo_object()
+
+        assert(type(photo.light_source) is not None)
+
+    def test_photo_flash_value(self):
+        photo = self.get_photo_object()
+
+        assert(type(photo.flash_value) is not None)
+
+    def test_photo_sharpness(self):
+        photo = self.get_photo_object()
+
+        assert(type(photo.sharpness) is not None)
+
+    def test_photo_date_time(self):
+        expected_format = re.compile("\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}")
+        photo = self.get_photo_object()
+
+        assert (type(photo.date_taken) is not None)
+        assert (expected_format.search(photo.date_taken) is not None), \
             "Image did not follow naming according to {}".format(expected_format.pattern)
 
 

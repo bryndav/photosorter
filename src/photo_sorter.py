@@ -1,11 +1,11 @@
 #!/usr/bin/env python2
-
 import os
 import logging
 import shutil
 import sys
 import PIL.ExifTags
 
+from photo import Photo
 from PIL import Image
 
 # Setting up logger properties
@@ -31,6 +31,7 @@ class PhotoSorter(object):
         """
         self.root_folder = root_folder
         self.img_list = self.get_unsorted_images()
+
         self.current_img = None
         self.current_exif = None
 
@@ -50,6 +51,7 @@ class PhotoSorter(object):
             for img in self.generate_img():
                 storage_dir = self._move_image()
                 self._rename_img(storage_dir, img)
+                Photo(**self.current_exif)
         else:
             logger.info("No photos found in {} exiting....".format(self.root_folder))
 
@@ -81,6 +83,7 @@ class PhotoSorter(object):
 
             old_file = os.path.join(storage_dir, img)
             new_file = os.path.join(storage_dir, new_name)
+            self.current_exif["Location"] = new_file
 
             try:
                 logger.debug("Renaming {} to {}".format(old_file, new_file))
@@ -105,7 +108,9 @@ class PhotoSorter(object):
             yield img
 
     def get_unsorted_images(self):
-        """Looks for images in the root folder of type jpg or jpeg."""
+        """
+        Looks for images in the root folder of type jpg or jpeg.
+        """
         img_list = []
 
         for f in os.listdir(self.root_folder):
