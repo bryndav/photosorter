@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 import os
 import logging
 import shutil
@@ -176,4 +176,4 @@ if __name__ == '__main__':
         sorter.sort()
 
     else:
-        print "Given path {} is not a valid directory, please provide a valid full path"
+        print "Given path {} is not a valid directory, please provide a valid full path".format(args.img_path)
